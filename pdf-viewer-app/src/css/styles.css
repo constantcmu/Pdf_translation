@@ -173,6 +173,16 @@ body {
     transition: transform 0.1s ease-out;
 }
 
+.page-placeholder {
+    background: #f0f0f0;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: pulse 1.5s infinite;
+}
+
 .pdf-page {
     max-width: 100%;
     height: auto;
@@ -180,6 +190,12 @@ body {
     border-radius: 8px;
     transition: transform 0.1s ease-out;
     will-change: transform;
+    background: white;
+    margin-bottom: 2rem;
+    transform-origin: top center;
+    backface-visibility: hidden; /* เพิ่มประสิทธิภาพการ render */
+    -webkit-backface-visibility: hidden;
+    will-change: transform;     /* แจ้ง browser เตรียมพร้อมสำหรับการ transform */
 }
 
 .pdf-page:hover {

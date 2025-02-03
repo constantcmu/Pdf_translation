@@ -33,6 +33,27 @@
             <span>กำลังโหลดเอกสาร...</span>
         </div>
         <div id="pages-container"></div>
+        <div class="page-controls">
+            <div class="page-info">
+                <div class="current-page">
+                    <span>หน้าที่</span>
+                    <span id="current-page-num">0</span>
+                </div>
+                <div class="total-pages">
+                    <span>จากทั้งหมด</span>
+                    <span id="total-pages">0</span>
+                    <span>หน้า</span>
+                </div>
+            </div>
+            <div class="page-navigation">
+                <button id="prev-page" class="nav-btn">
+                    <i class="fas fa-chevron-up"></i>
+                </button>
+                <button id="next-page" class="nav-btn">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';</script>

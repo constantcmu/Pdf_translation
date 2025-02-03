@@ -4,13 +4,23 @@ const ZOOM_STEP = 0.1;
 const MIN_SCALE = 0.5;
 const MAX_SCALE = 3.0;
 let pageRendering = false;
-let renderQueue = new Set(); // เปลี่ยนเป็น Set เพื่อป้องกันการซ้ำ
+let renderQueue = new Set();
+let currentPageNum = 1;
+let isChangingPage = false;
+let isHoldingButton = false;
+let holdScrollInterval = null;
+const SCROLL_SPEED = 20; // ความเร็วในการเลื่อน
+const SCROLL_INTERVAL = 16; // 60fps
 
 const pagesContainer = document.getElementById('pages-container');
+let pageChangeInterval = null;
+const PAGE_CHANGE_DELAY = 300; // ระยะเวลาระหว่างการเปลี่ยนหน้า (มิลลิวินาที)
 
 async function displayPDF(pdfUrl) {
     try {
-        renderQueue.clear(); // เคลียร์คิวเก่า
+        // เคลียร์สถานะเดิม
+        renderQueue.clear();
+        pagesContainer.innerHTML = '';
         const loadingTask = pdfjsLib.getDocument(pdfUrl);
         
         loadingTask.onProgress = function(progress) {
@@ -20,109 +30,143 @@ async function displayPDF(pdfUrl) {
         };
 
         pdfDoc = await loadingTask.promise;
-        pagesContainer.innerHTML = '';
         
-        // สร้าง placeholders สำหรับทุกหน้า
+        // อัพเดตจำนวนหน้าทั้งหมด
+        document.getElementById('total-pages').textContent = pdfDoc.numPages;
+        updatePageControls();
+        
+        // render ทุกหน้าตามลำดับ
         for(let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
-            const placeholder = document.createElement('div');
-            placeholder.className = 'page-placeholder';
-            placeholder.id = `page-${pageNum}`;
-            pagesContainer.appendChild(placeholder);
+            await renderPage(pageNum);
         }
-
-        // render หน้าแรกก่อน
-        await renderPage(1);
-        
-        // render หน้าที่เหลือ
-        for(let pageNum = 2; pageNum <= pdfDoc.numPages; pageNum++) {
-            if (!renderQueue.has(pageNum)) {
-                renderQueue.add(pageNum);
-                renderPage(pageNum);
-            }
-        }
+        currentPageNum = 1; // รีเซ็ตกลับไปหน้าแรก
     } catch (error) {
         console.error('Error loading PDF:', error);
+        document.querySelector('.loading-spinner span').textContent = 
+            'เกิดข้อผิดพลาดในการโหลดเอกสาร';
     }
+}
+
+function updatePageControls() {
+    document.getElementById('current-page-num').textContent = currentPageNum;
+    
+    // อัพเดตสถานะปุ่มนำทาง
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+    
+    if (prevBtn && nextBtn) {
+        prevBtn.disabled = currentPageNum <= 1;
+        nextBtn.disabled = currentPageNum >= pdfDoc.numPages;
+    }
+}
+
+async function changePage(delta) {
+    if (isChangingPage) return;
+    
+    const newPageNum = currentPageNum + delta;
+    if (newPageNum >= 1 && newPageNum <= pdfDoc.numPages) {
+        isChangingPage = true;
+        currentPageNum = newPageNum;
+        updatePageControls();
+        
+        const targetPage = document.getElementById(`page-${currentPageNum}`);
+        if (targetPage) {
+            targetPage.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start'
+            });
+            
+            setTimeout(() => {
+                isChangingPage = false;
+            }, 500);
+        } else {
+            isChangingPage = false;
+        }
+    }
+}
+
+function startSmoothScroll(direction) {
+    if (holdScrollInterval) return;
+    
+    const container = document.getElementById('pdfViewer');
+    holdScrollInterval = setInterval(() => {
+        container.scrollBy({
+            top: direction * SCROLL_SPEED,
+            behavior: 'auto'
+        });
+        
+        // อัพเดตหน้าปัจจุบันตามตำแหน่งการเลื่อน
+        const pages = document.getElementsByClassName('pdf-page');
+        for (let i = 0; i < pages.length; i++) {
+            const rect = pages[i].getBoundingClientRect();
+            if (rect.top >= 0 && rect.top <= window.innerHeight / 2) {
+                currentPageNum = i + 1;
+                updatePageControls();
+                break;
+            }
+        }
+    }, SCROLL_INTERVAL);
+}
+
+function stopSmoothScroll() {
+    if (holdScrollInterval) {
+        clearInterval(holdScrollInterval);
+        holdScrollInterval = null;
+    }
+    isHoldingButton = false;
 }
 
 async function renderPage(pageNumber) {
-    if (pageRendering) {
-        // ถ้ากำลัง render อยู่ให้รอ
-        await new Promise(resolve => setTimeout(resolve, 100));
-    }
-    
     try {
-        pageRendering = true;
-        
-        // ตรวจสอบว่าหน้านี้มีอยู่แล้วหรือไม่
-        const existingPage = document.getElementById(`page-${pageNumber}`);
-        if (existingPage && existingPage.tagName === 'CANVAS') {
-            pageRendering = false;
-            return; // ข้ามถ้ามีการ render แล้ว
-        }
-
         const page = await pdfDoc.getPage(pageNumber);
         const container = document.getElementById('pdfViewer');
         const containerWidth = container.clientWidth - 80;
-        const containerHeight = window.innerHeight - 200;
         
         const originalViewport = page.getViewport({ scale: 1 });
-        const scaleWidth = containerWidth / originalViewport.width;
-        const scaleHeight = containerHeight / originalViewport.height;
-        const baseScale = Math.min(scaleWidth, scaleHeight);
-        const viewport = page.getViewport({ scale: baseScale * currentScale });
+        const scale = containerWidth / originalViewport.width;
+        const viewport = page.getViewport({ scale: scale * currentScale });
 
         const canvas = document.createElement('canvas');
-        canvas.id = `page-${pageNumber}`;
         canvas.className = 'pdf-page';
-        canvas.height = viewport.height;
+        canvas.id = `page-${pageNumber}`; // เพิ่ม ID ให้กับ canvas
         canvas.width = viewport.width;
-        
+        canvas.height = viewport.height;
+
         const ctx = canvas.getContext('2d');
         
-        // แทนที่ placeholder ด้วย canvas
-        const placeholder = document.getElementById(`page-${pageNumber}`);
-        if (placeholder) {
-            placeholder.replaceWith(canvas);
-        }
-
-        await page.render({
+        const renderContext = {
             canvasContext: ctx,
             viewport: viewport,
-            enableWebGL: true
-        }).promise;
+            enableWebGL: false // ปิด WebGL เพื่อความเสถียร
+        };
+
+        await page.render(renderContext).promise;
+        pagesContainer.appendChild(canvas);
 
     } catch (error) {
         console.error(`Error rendering page ${pageNumber}:`, error);
-    } finally {
-        pageRendering = false;
-        renderQueue.delete(pageNumber); // ลบออกจากคิวเมื่อ render เสร็จ
     }
 }
 
-// เพิ่มการจัดการ zoom ด้วย mouse wheel
 function handleZoom(event) {
     event.preventDefault();
-
     const delta = Math.sign(event.deltaY);
     const oldScale = currentScale;
 
-    // ปรับ scale ตาม mouse wheel
     if (delta > 0) {
         currentScale = Math.max(MIN_SCALE, currentScale - ZOOM_STEP);
     } else {
         currentScale = Math.min(MAX_SCALE, currentScale + ZOOM_STEP);
     }
 
-    // ใช้ requestAnimationFrame เพื่อเพิ่มประสิทธิภาพ
     if (oldScale !== currentScale && pdfDoc) {
-        cancelAnimationFrame(renderQueue);
-        renderQueue = requestAnimationFrame(() => {
+        // รอให้การ render เสร็จสิ้นก่อนทำการ zoom
+        setTimeout(() => {
             pagesContainer.innerHTML = '';
             for(let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
                 renderPage(pageNum);
             }
-        });
+        }, 100);
     }
 }
 
@@ -139,5 +183,72 @@ window.addEventListener('resize', () => {
         displayPDF(document.querySelector('#upload').files[0]);
     }
 });
+
+// เพิ่ม Event Listeners สำหรับปุ่มนำทาง
+document.getElementById('prev-page').addEventListener('click', () => changePage(-1));
+document.getElementById('next-page').addEventListener('click', () => changePage(1));
+
+// เพิ่มการจัดการ keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowUp') {
+        changePage(-1);
+    } else if (e.key === 'ArrowDown') {
+        changePage(1);
+    }
+});
+
+// อัพเดตการผูก Event Listeners สำหรับปุ่มนำทาง
+function initializePageControls() {
+    const prevBtn = document.getElementById('prev-page');
+    const nextBtn = document.getElementById('next-page');
+
+    if (prevBtn && nextBtn) {
+        // จัดการการคลิกปุ่มก่อนหน้า
+        prevBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isHoldingButton = true;
+            changePage(-1);
+            setTimeout(() => {
+                if (isHoldingButton) {
+                    startSmoothScroll(-1);
+                }
+            }, 500);
+        });
+
+        // จัดการการคลิกปุ่มถัดไป
+        nextBtn.addEventListener('mousedown', (e) => {
+            e.preventDefault();
+            isHoldingButton = true;
+            changePage(1);
+            setTimeout(() => {
+                if (isHoldingButton) {
+                    startSmoothScroll(1);
+                }
+            }, 500);
+        });
+
+        // จัดการการปล่อยปุ่ม
+        document.addEventListener('mouseup', stopSmoothScroll);
+        document.addEventListener('mouseleave', stopSmoothScroll);
+        prevBtn.addEventListener('mouseleave', stopSmoothScroll);
+        nextBtn.addEventListener('mouseleave', stopSmoothScroll);
+    }
+
+    // จัดการ keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+        if (!isChangingPage) {
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                changePage(-1);
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                changePage(1);
+            }
+        }
+    });
+}
+
+// เรียกใช้ฟังก์ชันเมื่อโหลดเอกสาร
+document.addEventListener('DOMContentLoaded', initializePageControls);
 
 export { displayPDF };

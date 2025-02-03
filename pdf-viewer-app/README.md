@@ -1,47 +1,71 @@
-# PDF Viewer App
+# แอพพลิเคชันแสดงไฟล์ PDF
 
-This project is a web application that allows users to upload and display PDF files. It provides a simple interface for users to interact with PDF documents directly in their web browser.
+โปรเจคนี้เป็นเว็บแอพพลิเคชันสำหรับอัพโหลดและแสดงไฟล์ PDF โดยผู้ใช้สามารถดูเอกสาร PDF ได้โดยตรงผ่านเว็บบราวเซอร์
 
-## Project Structure
+## โครงสร้างโปรเจค
 
 ```
 pdf-viewer-app
 ├── src
 │   ├── css
-│   │   └── styles.css       # Styles for the application
+│   │   └── styles.css       # ไฟล์สำหรับจัดการรูปแบบการแสดงผล
 │   ├── js
-│   │   ├── app.js           # Initializes the application and handles user interactions
-│   │   └── pdfViewer.js      # Logic for displaying the uploaded PDF files
-│   └── index.html           # Main HTML file serving as the entry point
-├── package.json              # Configuration file for npm
-└── README.md                 # Documentation for the project
+│   │   ├── app.js          # จัดการการทำงานหลักและการโต้ตอบกับผู้ใช้
+│   │   └── pdfViewer.js    # ระบบแสดงผลไฟล์ PDF
+│   └── index.html          # หน้าหลักของแอพพลิเคชัน
+├── package.json            # ไฟล์กำหนดค่าสำหรับ npm
+└── README.md              # เอกสารอธิบายโปรเจค
 ```
 
-## Getting Started
+## ฟังก์ชันการทำงาน
 
-1. Clone the repository:
+### การแสดงผล PDF
+- แสดงไฟล์ PDF แบบหลายหน้า
+- ปรับขนาดอัตโนมัติให้พอดีกับหน้าจอ
+- รองรับการเลื่อนดูเอกสารแบบ scroll
+- แสดงเงาที่ขอบเอกสารเพื่อแยกแต่ละหน้า
+- ปรับขนาดอัตโนมัติเมื่อเปลี่ยนขนาดหน้าจอ
+
+### การจัดการไฟล์
+- อัพโหลดไฟล์ PDF ผ่านปุ่ม "Choose File"
+- ตรวจสอบประเภทไฟล์อัตโนมัติ (รองรับเฉพาะ .pdf)
+- แจ้งเตือนเมื่ออัพโหลดไฟล์ผิดประเภท
+
+### การแสดงผลหน้าเอกสาร
+- รองรับการแสดงผล PDF ทุกหน้า
+- จัดเรียงหน้าในแนวตั้ง
+- ระยะห่างระหว่างหน้าอัตโนมัติ
+- จัดกึ่งกลางเอกสารในพื้นที่แสดงผล
+
+## วิธีการติดตั้ง
+
+1. โคลนโปรเจค:
    ```
    git clone <repository-url>
    ```
 
-2. Navigate to the project directory:
+2. เข้าไปยังโฟลเดอร์โปรเจค:
    ```
    cd pdf-viewer-app
    ```
 
-3. Install the dependencies:
+3. ติดตั้ง dependencies:
    ```
    npm install
    ```
 
-4. Open `src/index.html` in your web browser to view the application.
+4. เปิดไฟล์ `src/index.html` ในเว็บบราวเซอร์เพื่อเริ่มใช้งาน
 
-## Features
+## เทคโนโลยีที่ใช้
+- PDF.js: ไลบรารีสำหรับแสดงผลไฟล์ PDF
+- JavaScript Modules: ระบบโมดูลสำหรับจัดการโค้ด
+- Flexbox: ระบบจัดการ Layout
+- CSS Grid: ระบบจัดการการแสดงผลแบบตาราง
 
-- Upload PDF files
-- Display PDF files in the browser
-- User-friendly interface
+## ข้อจำกัด
+- รองรับเฉพาะไฟล์ PDF เท่านั้น
+- ต้องใช้งานผ่านเว็บเซิร์ฟเวอร์เพื่อให้ JavaScript Modules ทำงานได้
+- ขนาดไฟล์ PDF ขึ้นอยู่กับความสามารถของเบราว์เซอร์
 
-## License
-
-This project is licensed under the MIT License.
+## สิทธิ์การใช้งาน
+โปรเจคนี้อยู่ภายใต้ MIT License

@@ -3,20 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Viewer App</title>
+    <title>Aooddy PDF Viewer</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="css/styles.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 </head>
 <body>
-    <div id="app">
-        <h1>PDF Viewer</h1>
-        <div class="upload-container">
-            <input type="file" id="upload" accept="application/pdf">
+    <nav class="top-nav">
+        <div class="app-header">
+            <div class="logo">
+                <i class="fas fa-book-reader"></i>
+                <div class="logo-text">
+                    <span class="logo-title">Aooddy</span>
+                    <span class="logo-subtitle">Pdf Viewer</span>
+                </div>
+            </div>
+            <label class="upload-btn">
+                <i class="fas fa-cloud-upload-alt"></i>
+                เปิดเอกสาร
+                <input type="file" id="upload" accept="application/pdf" hidden>
+            </label>
         </div>
-        <div id="pdfViewer">
-            <div id="pages-container"></div>
+    </nav>
+
+    <div id="pdfViewer">
+        <div class="loading-spinner hidden">
+            <i class="fas fa-spinner"></i>
+            <span>กำลังโหลดเอกสาร...</span>
         </div>
+        <div id="pages-container"></div>
     </div>
+
     <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';</script>
     <script src="js/pdfViewer.js" type="module"></script>
     <script src="js/app.js" type="module"></script>

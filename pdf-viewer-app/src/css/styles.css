@@ -1,0 +1,46 @@
+body {
+    margin: 0;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+#app {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.upload-container {
+    margin: 20px 0;
+}
+
+#pdfViewer {
+    border: 1px solid #ccc;
+    min-height: 500px;
+    overflow-y: auto;      /* เพิ่ม scroll แนวตั้ง */
+    max-height: 90vh;      /* จำกัดความสูงสูงสุดไม่เกิน 90% ของความสูงหน้าจอ */
+    width: 100%;           /* ใช้ความกว้างเต็มพื้นที่ */
+    display: flex;         /* จัดการแสดงผลแบบ flex */
+    justify-content: center; /* จัดให้อยู่กึ่งกลางแนวนอน */
+    align-items: flex-start; /* จัดให้ชิดด้านบน */
+}
+
+#pdf-canvas {
+    margin: 0 auto;
+    display: block;
+    max-width: 100%;       /* จำกัดความกว้างไม่เกินขนาดพื้นที่ */
+    height: auto;          /* ปรับความสูงอัตโนมัติตามอัตราส่วน */
+}
+
+#pages-container {
+    display: flex;
+    flex-direction: column;  /* จัดเรียงหน้า PDF แนวตั้ง */
+    align-items: center;     /* จัดกึ่งกลางแนวนอน */
+    gap: 20px;              /* ระยะห่างระหว่างหน้า */
+    padding: 20px;
+}
+
+.pdf-page {
+    max-width: 100%;        /* ความกว้างสูงสุดของแต่ละหน้า */
+    height: auto;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); /* เพิ่มเงาให้แต่ละหน้า */
+}

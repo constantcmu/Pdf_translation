@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Viewer App</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>PDF Viewer</h1>
+        <div class="upload-container">
+            <input type="file" id="upload" accept="application/pdf">
+        </div>
+        <div id="pdfViewer">
+            <div id="pages-container"></div>
+        </div>
+    </div>
+    <script>pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';</script>
+    <script src="js/pdfViewer.js" type="module"></script>
+    <script src="js/app.js" type="module"></script>
+</body>
+</html>

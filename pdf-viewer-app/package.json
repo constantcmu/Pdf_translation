@@ -1,0 +1,15 @@
+{
+  "name": "pdf-viewer-app",
+  "version": "1.0.0",
+  "description": "A web application that allows users to upload and display PDF files.",
+  "main": "src/js/app.js",
+  "scripts": {
+    "start": "live-server src",
+    "build": "echo 'No build step required'"
+  },
+  "dependencies": {
+    "pdfjs-dist": "^2.10.377"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}

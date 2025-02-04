@@ -40,6 +40,9 @@ async function displayPDF(pdfUrl) {
             await renderPage(pageNum);
         }
         currentPageNum = 1; // รีเซ็ตกลับไปหน้าแรก
+
+        // After rendering first page, show its text
+        await updateTextDisplay(1);
     } catch (error) {
         console.error('Error loading PDF:', error);
         document.querySelector('.loading-spinner span').textContent = 
@@ -68,6 +71,9 @@ async function changePage(delta) {
         isChangingPage = true;
         currentPageNum = newPageNum;
         updatePageControls();
+        
+        // Add text detection update
+        await updateTextDisplay(currentPageNum);
         
         const targetPage = document.getElementById(`page-${currentPageNum}`);
         if (targetPage) {
@@ -250,5 +256,30 @@ function initializePageControls() {
 
 // เรียกใช้ฟังก์ชันเมื่อโหลดเอกสาร
 document.addEventListener('DOMContentLoaded', initializePageControls);
+
+async function extractPageText(pageNumber) {
+    try {
+        const page = await pdfDoc.getPage(pageNumber);
+        const textContent = await page.getTextContent();
+        const textItems = textContent.items;
+        return textItems.map(item => item.str).join(' ');
+    } catch (error) {
+        console.error('Error extracting text:', error);
+        return '';
+    }
+}
+
+async function updateTextDisplay(pageNumber) {
+    const textContainer = document.getElementById('detected-text');
+    textContainer.innerHTML = '<div class="loading">กำลังดีเทคข้อความ...</div>';
+    
+    const text = await extractPageText(pageNumber);
+    textContainer.innerHTML = `
+        <div class="page-text">
+            <h4>หน้าที่ ${pageNumber}</h4>
+            <p>${text || 'ไม่พบข้อความในหน้านี้'}</p>
+        </div>
+    `;
+}
 
 export { displayPDF };

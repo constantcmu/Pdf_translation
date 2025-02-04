@@ -1,3 +1,5 @@
+import { startCubeAnimation } from './cubeAnimation.js';
+
 let pdfDoc = null;
 let currentScale = 1.0;
 const ZOOM_STEP = 0.1;
@@ -255,7 +257,10 @@ function initializePageControls() {
 }
 
 // เรียกใช้ฟังก์ชันเมื่อโหลดเอกสาร
-document.addEventListener('DOMContentLoaded', initializePageControls);
+document.addEventListener('DOMContentLoaded', () => {
+    initializePageControls();
+    startCubeAnimation();
+});
 
 async function extractPageText(pageNumber) {
     try {

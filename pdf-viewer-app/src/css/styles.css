@@ -356,6 +356,30 @@ body {
     font-style: italic;
 }
 
+.cube-animation {
+    background: black;
+    border-radius: 12px;
+    padding: 2rem;
+    margin-top: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    min-height: 300px; /* เพิ่มความสูงขั้นต่ำ */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#cubeRenderer {
+    font-family: monospace;
+    color: #fff;
+    font-size: 12px; /* เพิ่มขนาดตัวอักษร */
+    line-height: 1;
+    white-space: pre;
+    margin: 0;
+    overflow: visible; /* อนุญาตให้เนื้อหาล้นออกมาได้ */
+    transform: scale(1.2); /* ขยายขนาดการแสดงผล */
+    transform-origin: center center;
+}
+
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
